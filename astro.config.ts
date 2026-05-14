@@ -9,11 +9,17 @@ import node from "@astrojs/node";
 import vercel from "@astrojs/vercel";
 
 const env = loadEnv(process.env.NODE_ENV ?? "production", process.cwd(), "");
-const site = (env.PUBLIC_SITE_ORIGIN ?? "https://zeustra.osloop.com").replace(
-  /\/+$/g,
-  "",
-);
-const adapterTarget = (env.ASTRO_ADAPTER ?? "node").toLowerCase();
+const site = (
+  process.env.PUBLIC_SITE_ORIGIN ??
+  env.PUBLIC_SITE_ORIGIN ??
+  "https://zeustra.osloop.com"
+).replace(/\/+$/g, "");
+
+const adapterTarget = (
+  process.env.ASTRO_ADAPTER ??
+  env.ASTRO_ADAPTER ??
+  (process.env.VERCEL ? "vercel" : "node")
+).toLowerCase();
 const adapter = (() => {
   switch (adapterTarget) {
     case "node":
