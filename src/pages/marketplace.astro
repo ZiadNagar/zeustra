@@ -1,0 +1,32 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Footer from "../components/layout/Footer.astro";
+import MarketplaceGrid from "@/features/marketplace/sections/MarketplaceGrid.astro";
+import MarketplaceFeatureCard from "@/features/marketplace/sections/MarketplaceFeatureCard";
+import Header from "../components/layout/Header.astro";
+import MarketplaceHero from "@/features/marketplace/sections/MarketplaceHero";
+import MarketplaceCTA from "@/features/marketplace/sections/MarketplaceCTA";
+import { PAGE_SEO } from "../data/pagesSeo";
+
+const seo = PAGE_SEO.marketplace;
+---
+
+<BaseLayout
+  title={seo.title}
+  description={seo.description}
+  keywords={seo.keywords}
+  canonical={seo.path}
+>
+  <div class="min-h-screen overflow-x-hidden bg-black text-white">
+    <Header currentPathname={Astro.url.pathname} />
+
+    <main class="flex-1 bg-black">
+      <MarketplaceHero />
+      <MarketplaceFeatureCard client:load />
+      <MarketplaceGrid />
+      <MarketplaceCTA />
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

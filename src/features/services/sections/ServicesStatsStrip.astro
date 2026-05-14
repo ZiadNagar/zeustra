@@ -1,0 +1,67 @@
+---
+const statsData = [
+  {
+    id: 1,
+    value: "10k+",
+    label: "Clients",
+  },
+  {
+    id: 2,
+    value: "15-20%",
+    label: "Avg. Added Value",
+  },
+  {
+    id: 3,
+    value: "70%",
+    label: "Faster Execution",
+  },
+  {
+    id: 4,
+    value: "95%",
+    label: "Close Rate",
+  },
+];
+---
+
+<section class="relative w-full py-16 md:py-20 lg:py-24">
+  <div
+    class="absolute inset-0"
+    style="background:linear-gradient(150deg, #3B82F6 -75%, rgba(59, 130, 246, 0.05) 13.65%);"
+  >
+  </div>
+
+  <div class="pointer-events-none absolute top-0 right-0 left-0 h-px">
+    <div
+      class="absolute inset-0"
+      style="background:linear-gradient(90deg, transparent 0%, rgba(77, 181, 255, 0.35) 50%, transparent 100%);"
+    >
+    </div>
+  </div>
+
+  <div class="pointer-events-none absolute right-0 bottom-0 left-0 h-px">
+    <div
+      class="absolute inset-0"
+      style="background:linear-gradient(90deg, transparent 0%, rgba(77, 181, 255, 0.3) 50%, transparent 100%);"
+    >
+    </div>
+  </div>
+
+  <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div
+      class="mx-auto grid max-w-300 grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 lg:gap-8"
+    >
+      {
+        statsData.map((stat) => (
+          <div class="pointer-events-none flex cursor-default flex-col items-center justify-center gap-3 text-center">
+            <div class="bg-linear-to-r from-brand-blue-deep to-brand-blue-light bg-clip-text text-[clamp(36px,5vw,48px)] leading-tight font-bold text-transparent">
+              {stat.value}
+            </div>
+            <div class="text-[clamp(18px,2.5vw,24px)] leading-relaxed font-normal text-slate-300">
+              {stat.label}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

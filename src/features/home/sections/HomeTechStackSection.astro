@@ -1,0 +1,36 @@
+---
+import SectionHeader from "@/components/shared/SectionHeader.astro";
+import { SECTION_HEADERS } from "@/features/home/data/homePageData";
+
+const TECH_STACK_VIDEO_SRC =
+  "/assets/videos/home/home-teck-stack-flow-video.mp4";
+const TECH_STACK_POSTER_SRC =
+  "/assets/images/home-teck-stack-flow-placeholder-image.webp";
+const headerConfig = SECTION_HEADERS.techStack;
+---
+
+<section class="relative overflow-hidden px-4 py-24">
+  <div class="relative z-10 mx-auto max-w-5xl">
+    <SectionHeader
+      title={headerConfig.title}
+      subtitle={headerConfig.subtitle}
+      highlightWord={headerConfig.highlightWord}
+      highlightPosition={headerConfig.highlightPosition}
+      maxWidth="max-w-5xl"
+    />
+
+    <div class="relative mx-auto w-full">
+      <video
+        class="w-full h-auto object-cover"
+        src={TECH_STACK_VIDEO_SRC}
+        poster={TECH_STACK_POSTER_SRC}
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        aria-label="Flow from global AI models through Zeustra to automated execution: agents, analytics, skills, and payments"
+      ></video>
+    </div>
+  </div>
+</section>

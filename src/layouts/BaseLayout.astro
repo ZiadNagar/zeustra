@@ -1,0 +1,110 @@
+---
+import { ClientRouter } from "astro:transitions";
+
+import { SchedulerModalProvider } from "@/contexts/SchedulerModalProvider";
+import PageLoader from "@/components/loaders/PageLoader.astro";
+
+import "@/styles/theme.css";
+import "../styles/global.css";
+
+const {
+  title = "Zeustra",
+  description = "Zeustra - Professional real estate technology platform for commercial property transactions, asset management, and marketplace solutions.",
+  keywords = [],
+  canonical,
+  noindex = false,
+  ogImage = "/image-content.png",
+  ogImageAlt = "Zeustra - Real Estate Technology Platform",
+} = Astro.props;
+
+const SITE_NAME = "Zeustra";
+const TWITTER_HANDLE = "@zeustra";
+
+const toCanonicalUrl = (value: string | undefined): string => {
+  const url = value ? new URL(value, Astro.site) : new URL(Astro.url);
+
+  if (url.pathname !== "/" && !url.pathname.endsWith("/")) {
+    url.pathname = `${url.pathname}/`;
+  }
+
+  return url.toString();
+};
+
+const canonicalUrl = canonical
+  ? toCanonicalUrl(canonical)
+  : toCanonicalUrl(undefined);
+const robots = noindex ? "noindex, nofollow" : "index, follow";
+const ogImageUrl = new URL(ogImage, Astro.site).toString();
+const fullTitle = title === "Zeustra" ? title : `${title} | Zeustra`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {keywords.length > 0 && <meta name="keywords" content={keywords.join(", ")} />}
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/zeustra-icon.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/zeustra-icon.png" sizes="16x16" />
+    <link rel="apple-touch-icon" href="/zeustra-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0A0A0A" />
+    <meta name="msapplication-TileColor" content="#0A0A0A" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={TWITTER_HANDLE} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+
+    <!-- Structured Data - Organization -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Zeustra",
+        "url": "https://zeustra.osloop.com",
+        "logo": "https://zeustra.osloop.com/zeustra-icon.png",
+        "description": "Professional real estate technology platform for commercial property transactions, asset management, and marketplace solutions.",
+        "sameAs": [
+          "https://linkedin.com/company/zeustra",
+          "https://twitter.com/zeustra"
+        ]
+      }
+    </script>
+
+    <ClientRouter />
+
+    <slot name="head" />
+  </head>
+  <body>
+    <PageLoader />
+    <SchedulerModalProvider client:load>
+      <div id="page-content">
+        <slot />
+      </div>
+    </SchedulerModalProvider>
+  </body>
+</html>

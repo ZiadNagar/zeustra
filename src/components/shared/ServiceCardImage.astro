@@ -1,0 +1,29 @@
+---
+type ServiceCardImageSize = "small" | "default" | "large" | "full";
+
+type Props = {
+  src: string;
+  alt: string;
+  size?: ServiceCardImageSize;
+  className?: string;
+};
+
+const { src, alt, size = "default", className = "" } = Astro.props as Props;
+
+const sizeClasses: Record<ServiceCardImageSize, string> = {
+  small: "max-h-[120px]",
+  default: "max-h-[200px]",
+  large: "max-h-[320px] sm:max-h-[380px] lg:max-h-[480px]",
+  full: "w-full h-full",
+};
+---
+
+<div
+  class={`relative flex items-center justify-center overflow-hidden py-4 ${className}`}
+>
+  <img
+    src={src}
+    alt={alt}
+    class={`h-auto w-auto max-w-full object-contain ${sizeClasses[size]}`}
+  />
+</div>

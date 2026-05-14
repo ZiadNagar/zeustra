@@ -1,0 +1,109 @@
+---
+type ServiceCardVariant = "default" | "gradient" | "glass";
+
+type Props = {
+  className?: string;
+  variant?: ServiceCardVariant;
+  link?: string;
+  clickable?: boolean;
+  style?: string;
+};
+
+const {
+  className = "",
+  variant = "default",
+  link = "#",
+  clickable = false,
+  style = "",
+  ...rest
+} = Astro.props as Props;
+
+const variantMap = {
+  default: {
+    bg: "#141414",
+    border: "border-white/[0.06]",
+    hoverBorder: "hover:border-brand-blue/30",
+    hoverShadow: "hover:shadow-[0_0_40px_rgba(59,130,246,0.15)]",
+  },
+  gradient: {
+    bg: "linear-gradient(121deg, #3B82F6 -49.01%, rgba(59, 130, 246, 0.05) 13.65%)",
+    border: "border-transparent",
+    hoverBorder: "",
+    hoverShadow: "",
+  },
+  glass: {
+    bg: "rgba(255, 255, 255, 0.03)",
+    border: "border-white/[0.08]",
+    hoverBorder: "hover:border-brand-blue/40",
+    hoverShadow: "hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]",
+  },
+} as const;
+
+const selected = variantMap[variant];
+const mergedStyle = style ? `${selected.bg}; ${style}` : selected.bg;
+---
+
+{
+  clickable ? (
+    <a
+      href={link}
+      class={`group relative flex flex-col rounded-xl border p-4 sm:p-5 lg:p-6 xl:p-8 ${selected.border} ${selected.hoverBorder} ${selected.hoverShadow} ${className} overflow-hidden backdrop-blur-sm transition-all duration-500`}
+      style={`background: ${mergedStyle}`}
+      {...rest}
+    >
+      {variant === "gradient" && (
+        <>
+          <div
+            class="pointer-events-none absolute inset-0 rounded-2xl"
+            style="padding:1px;background:linear-gradient(255deg,#4DB5FF 0%,#202121 36.26%);-webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;"
+          ></div>
+          <div
+            class="pointer-events-none absolute inset-0 rounded-2xl"
+            style="background:linear-gradient(121deg, rgba(59, 130, 246, 0.1) -49.01%, rgba(59, 130, 246, 0.02) 13.65%);"
+          ></div>
+        </>
+      )}
+
+      <div class="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+        <div
+          class="absolute inset-0 rounded-2xl"
+          style="background:radial-gradient(ellipse 80% 80% at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 100%);"
+        ></div>
+      </div>
+
+      <div class="relative z-10 flex h-full flex-col">
+        <slot />
+      </div>
+    </a>
+  ) : (
+    <div
+      class={`group relative flex cursor-default flex-col rounded-xl border p-4 sm:p-5 lg:p-6 xl:p-8 ${selected.border} ${selected.hoverBorder} ${selected.hoverShadow} ${className} overflow-hidden backdrop-blur-sm transition-all duration-500`}
+      style={`background: ${mergedStyle}`}
+      {...rest}
+    >
+      {variant === "gradient" && (
+        <>
+          <div
+            class="pointer-events-none absolute inset-0 rounded-2xl"
+            style="padding:1px;background:linear-gradient(255deg,#4DB5FF 0%,#202121 36.26%);-webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;"
+          ></div>
+          <div
+            class="pointer-events-none absolute inset-0 rounded-2xl"
+            style="background:linear-gradient(121deg, rgba(59, 130, 246, 0.1) -49.01%, rgba(59, 130, 246, 0.02) 13.65%);"
+          ></div>
+        </>
+      )}
+
+      <div class="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+        <div
+          class="absolute inset-0 rounded-2xl"
+          style="background:radial-gradient(ellipse 80% 80% at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 100%);"
+        ></div>
+      </div>
+
+      <div class="relative z-10 flex h-full flex-col">
+        <slot />
+      </div>
+    </div>
+  )
+}

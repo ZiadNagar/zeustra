@@ -1,0 +1,140 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import BlogIndexIsland from "../components/islands/BlogIndexIsland";
+import type { BlogCategoryOption, BlogIndexPost } from "@/features/blog/types";
+import Footer from "../components/layout/Footer.astro";
+import Header from "../components/layout/Header.astro";
+import { formatBlogDate } from "../utils/date";
+import {
+  fetchAllBlogCards,
+  fetchBlogCategories,
+  fetchFeaturedBlogCards,
+  type StrapiBlogCategoryRecord,
+  type StrapiBlogCardRecord,
+} from "@/lib/strapi";
+import { ALL_POSTS } from "@/features/blog/utils/blogHelpers";
+import { PAGE_SEO } from "../data/pagesSeo";
+
+export const prerender = false;
+
+Astro.response.headers.set("Cache-Control", "no-store, max-age=0");
+
+const seo = PAGE_SEO.blog;
+
+const DEFAULT_AUTHOR_NAME = "Zeustra Team";
+const DEFAULT_CATEGORY_LABEL = "Insights";
+
+const toSafeDate = (value: string): Date => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.valueOf())) {
+    return new Date();
+  }
+
+  return parsed;
+};
+
+const toAuthorLabel = (authors: StrapiBlogCardRecord["authors"]): string => {
+  if (authors.length === 0) {
+    return DEFAULT_AUTHOR_NAME;
+  }
+
+  const names = authors
+    .map((author) => author.name.trim())
+    .filter((name) => Boolean(name));
+
+  return names.length > 0 ? names.join(", ") : DEFAULT_AUTHOR_NAME;
+};
+
+const toAuthorAvatars = (
+  authors: StrapiBlogCardRecord["authors"],
+): Array<string | null> => authors.map((author) => author.avatar ?? null);
+
+const toBlogIndexPost = (card: StrapiBlogCardRecord): BlogIndexPost => {
+  const publishedDate = toSafeDate(card.publishedAt);
+
+  return {
+    slug: card.slug,
+    title: card.title,
+    subtitle: card.subtitle,
+    excerpt: card.excerpt,
+    publishDateLabel: formatBlogDate(publishedDate),
+    publishDateISO: publishedDate.toISOString(),
+    tags: card.tags,
+    author: toAuthorLabel(card.authors),
+    authorAvatars: toAuthorAvatars(card.authors),
+    category: card.category?.title ?? card.tags[0] ?? DEFAULT_CATEGORY_LABEL,
+    categorySlug: card.category?.slug ?? null,
+    image: card.coverImage ?? "",
+  };
+};
+
+const toCategoryOption = (
+  category: StrapiBlogCategoryRecord,
+): BlogCategoryOption => ({
+  label: category.title,
+  value: category.slug,
+});
+
+const buildFallbackCategoryOptions = (
+  posts: BlogIndexPost[],
+): BlogCategoryOption[] => {
+  const seen = new Map<string, string>();
+
+  for (const post of posts) {
+    if (!post.categorySlug || !post.category) {
+      continue;
+    }
+
+    if (!seen.has(post.categorySlug)) {
+      seen.set(post.categorySlug, post.category);
+    }
+  }
+
+  const endpointLike = Array.from(seen.entries())
+    .map(([value, label]) => ({ value, label }))
+    .sort((left, right) => left.label.localeCompare(right.label));
+
+  return [{ label: "All Posts", value: ALL_POSTS }, ...endpointLike];
+};
+
+const dynamicCards = await fetchAllBlogCards();
+const dynamicFeedPosts =
+  dynamicCards?.map((card) => toBlogIndexPost(card)) ?? [];
+
+const dynamicFeaturedCards = await fetchFeaturedBlogCards();
+const dynamicFeaturedPosts =
+  dynamicFeaturedCards?.map((card) => toBlogIndexPost(card)).slice(0, 2) ?? [];
+
+const feedPosts: BlogIndexPost[] = dynamicFeedPosts;
+const featuredPosts: BlogIndexPost[] = dynamicFeaturedPosts;
+
+const dynamicCategories = await fetchBlogCategories();
+const categories: BlogCategoryOption[] = dynamicCategories
+  ? [
+      { label: "All Posts", value: ALL_POSTS },
+      ...dynamicCategories.map(toCategoryOption),
+    ]
+  : buildFallbackCategoryOptions(feedPosts);
+---
+
+<BaseLayout
+  title={seo.title}
+  description={seo.description}
+  keywords={seo.keywords}
+  canonical={seo.path}
+>
+  <div class="min-h-screen overflow-x-hidden bg-black text-white">
+    <Header currentPathname={Astro.url.pathname} />
+
+    <main class="flex-1">
+      <BlogIndexIsland
+        client:load
+        feedPosts={feedPosts}
+        featuredPosts={featuredPosts}
+        categories={categories}
+      />
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

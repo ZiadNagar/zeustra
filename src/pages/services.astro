@@ -1,0 +1,42 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { PAGE_SEO } from "@/data/pagesSeo";
+import Footer from "../components/layout/Footer.astro";
+import ServicesStatsStrip from "@/features/services/sections/ServicesStatsStrip.astro";
+import ServicesBentoGrid from "@/features/services/sections/ServicesBentoGrid.astro";
+import ServicesValueProps from "@/features/services/sections/ServicesValueProps.astro";
+import Header from "../components/layout/Header.astro";
+import ServicesHero from "@/features/services/sections/ServicesHero";
+import ServicesCTA from "@/features/services/sections/ServicesCTA";
+---
+
+<BaseLayout
+  title={PAGE_SEO.services.title}
+  description={PAGE_SEO.services.description}
+  keywords={PAGE_SEO.services.keywords}
+  canonical={PAGE_SEO.services.path}
+>
+  <div class="min-h-screen overflow-x-hidden bg-black text-white">
+    <Header currentPathname={Astro.url.pathname} />
+
+    <main class="relative flex-1 bg-black">
+      <div
+        class="pointer-events-none absolute inset-0 z-0 h-[130dvh] w-screen"
+        style={{
+          backgroundImage: 'url("/assets/images/wavy-lines-background.svg")',
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+      </div>
+
+      <ServicesHero />
+      <ServicesBentoGrid />
+      <ServicesValueProps />
+      <ServicesStatsStrip />
+      <ServicesCTA />
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

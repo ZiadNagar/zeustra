@@ -1,0 +1,95 @@
+---
+type Props = {
+  title: string;
+  subtitle?: string;
+  highlightWord?: string;
+  highlightPosition?: string | number;
+  highlightFromColor?: string;
+  highlightToColor?: string;
+  titleClassName?: string;
+  subtitleClassName?: string;
+  containerClassName?: string;
+  maxWidth?: string;
+};
+
+const {
+  title,
+  subtitle,
+  highlightWord,
+  highlightPosition = "before",
+  highlightFromColor = "var(--color-brand-cyan)",
+  highlightToColor = "var(--color-brand-blue-light)",
+  titleClassName = "",
+  subtitleClassName = "",
+  containerClassName = "",
+  maxWidth = "max-w-2xl",
+} = Astro.props as Props;
+
+const words = title.split(" ");
+const highlightIndex = highlightWord
+  ? words.findIndex((word) =>
+      word.toLowerCase().includes(highlightWord.toLowerCase()),
+    )
+  : -1;
+
+const hasInlineHighlight = Boolean(highlightWord) && highlightIndex >= 0;
+
+const beforeText = hasInlineHighlight
+  ? words.slice(0, highlightIndex).join(" ")
+  : "";
+const highlightedText = hasInlineHighlight ? words[highlightIndex] : "";
+const afterText = hasInlineHighlight
+  ? words.slice(highlightIndex + 1).join(" ")
+  : "";
+---
+
+<div
+  class={`flex flex-col items-center justify-center gap-4 sm:gap-6 text-center ${containerClassName}`}
+>
+  <div
+    class={`flex flex-col items-center justify-center gap-4 sm:gap-6 ${maxWidth} mx-auto`}
+  >
+    <h2
+      class={`text-2xl sm:text-3xl lg:text-[48px] font-medium text-neutral-100 leading-tight lg:leading-18 tracking-tight lg:tracking-[-2.16px] ${titleClassName}`}
+    >
+      {
+        hasInlineHighlight ? (
+          <>
+            {beforeText && <span>{beforeText} </span>}
+            <span
+              class="font-bold bg-linear-to-r bg-clip-text text-transparent"
+              style={`background-image:linear-gradient(to right, ${highlightFromColor}, ${highlightToColor});text-shadow:var(--shadow-heading-glow);`}
+            >
+              {highlightedText}
+            </span>
+            {afterText && <span> {afterText}</span>}
+          </>
+        ) : (
+          <span>{title}</span>
+        )
+      }
+    </h2>
+    {
+      subtitle && (
+        <p
+          class={`text-sm sm:text-lg lg:text-[24px] font-normal text-slate-300 px-4 ${subtitleClassName}`}
+        >
+          {subtitle}
+        </p>
+      )
+    }
+  </div>
+
+  {
+    highlightPosition === "separate" && highlightWord && (
+      <div class="relative mt-6">
+        <h3
+          class="text-5xl font-medium leading-normal tracking-[-4.5%] bg-linear-to-r bg-clip-text text-transparent"
+          style={`background-image:linear-gradient(to right, ${highlightFromColor}, ${highlightToColor});text-shadow:var(--shadow-heading-glow);filter:blur(var(--blur-heading-soft));`}
+        >
+          {highlightWord}
+        </h3>
+      </div>
+    )
+  }
+</div>

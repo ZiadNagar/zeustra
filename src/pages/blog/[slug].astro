@@ -1,0 +1,725 @@
+---
+import { marked } from "marked";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Footer from "../../components/layout/Footer.astro";
+import Header from "../../components/layout/Header.astro";
+import { formatBlogDate } from "../../utils/date";
+import {
+  fetchBlogDetailBySlug,
+  fetchBlogFooterContextBySlug,
+  type StrapiBlogCardRecord,
+  type TiptapDocument,
+} from "@/lib/strapi";
+import { renderTiptapToHtml, isTiptapDocument } from "@/lib/tiptap";
+
+const DEFAULT_AUTHOR_NAME = "Zeustra Team";
+const DEFAULT_CATEGORY_LABEL = "Insights";
+const FOOTER_CARD_LIMIT = 3;
+const BLOG_FALLBACK_AVATAR = "/assets/images/brand/zeustra-logo-minimal.svg";
+const IMAGE_FALLBACK_ON_ERROR =
+  "this.onerror=null;this.src='/assets/images/blogs/blog-thumb01.png';";
+const AVATAR_FALLBACK_ON_ERROR = `this.onerror=null;this.src='${BLOG_FALLBACK_AVATAR}';`;
+
+export const prerender = false;
+
+Astro.response.headers.set("Cache-Control", "no-store, max-age=0");
+
+const BLOG_PREVIEW_IMAGES = [
+  "/assets/images/blogs/blog-thumb01.png",
+  "/assets/images/blogs/blog-thumb02.png",
+  "/assets/images/blogs/blog-thumb03.png",
+  "/assets/images/blogs/blog-thumb04.png",
+];
+
+const toSafeDate = (value: string): Date => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.valueOf())) {
+    return new Date();
+  }
+
+  return parsed;
+};
+
+const getPreviewImageForSlug = (slug: string): string => {
+  let hash = 0;
+
+  for (let index = 0; index < slug.length; index += 1) {
+    hash = (hash << 5) - hash + slug.charCodeAt(index);
+    hash |= 0;
+  }
+
+  const normalizedIndex = Math.abs(hash) % BLOG_PREVIEW_IMAGES.length;
+  return BLOG_PREVIEW_IMAGES[normalizedIndex] ?? BLOG_PREVIEW_IMAGES[0];
+};
+
+const dedupeBySlug = (
+  cards: StrapiBlogCardRecord[],
+): StrapiBlogCardRecord[] => {
+  const bySlug = new Map<string, StrapiBlogCardRecord>();
+
+  for (const card of cards) {
+    if (!bySlug.has(card.slug)) {
+      bySlug.set(card.slug, card);
+    }
+  }
+
+  return Array.from(bySlug.values());
+};
+
+const slug = String(Astro.params.slug ?? "").trim();
+
+const dynamicPost = slug ? await fetchBlogDetailBySlug(slug) : null;
+
+const article = dynamicPost;
+
+if (!article) {
+  return Astro.rewrite("/404");
+}
+
+const articleDate = toSafeDate(article.publishedAt);
+const publishedAt = formatBlogDate(articleDate);
+const authorName = article.authors[0]?.name ?? DEFAULT_AUTHOR_NAME;
+const authorAvatar = article.authors[0]?.avatar ?? BLOG_FALLBACK_AVATAR;
+const articleImage = article.coverImage ?? getPreviewImageForSlug(article.slug);
+
+const canonicalSlug = article.slug || slug;
+const postPath = `/blog/${canonicalSlug}/`;
+const shareTarget = new URL(postPath, Astro.url).toString();
+const encodedUrl = encodeURIComponent(shareTarget);
+const encodedTitle = encodeURIComponent(article.title);
+
+const shareLinks = {
+  twitter: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`,
+  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
+};
+
+const footerContext = canonicalSlug
+  ? await fetchBlogFooterContextBySlug(canonicalSlug, FOOTER_CARD_LIMIT)
+  : null;
+
+const resolvedFooterCards =
+  footerContext &&
+  (footerContext.related.length > 0 || footerContext.more.length > 0)
+    ? dedupeBySlug([...footerContext.related, ...footerContext.more]).slice(
+        0,
+        FOOTER_CARD_LIMIT,
+      )
+    : [];
+
+const relatedCards = resolvedFooterCards.map((card, index) => {
+  const cardAuthorName = card.authors[0]?.name ?? DEFAULT_AUTHOR_NAME;
+  const cardPublishedAt = toSafeDate(card.publishedAt);
+
+  return {
+    key: `${card.slug}-${index}`,
+    slug: card.slug,
+    title: card.title,
+    author: cardAuthorName,
+    avatar: card.authors[0]?.avatar ?? BLOG_FALLBACK_AVATAR,
+    category: card.category?.title ?? card.tags[0] ?? DEFAULT_CATEGORY_LABEL,
+    publishDateLabel: formatBlogDate(cardPublishedAt),
+    publishDateISO: cardPublishedAt.toISOString(),
+    image: card.coverImage ?? getPreviewImageForSlug(card.slug),
+  };
+});
+
+const renderContent = (content: TiptapDocument | string): string => {
+  if (isTiptapDocument(content)) {
+    return renderTiptapToHtml(content);
+  }
+  return marked.parse(content, { async: false }) as string;
+};
+
+const articleHtml = renderContent(article.content);
+---
+
+<BaseLayout
+  title={article.seo.title || `${article.title} | Zeustra Blog`}
+  description={article.seo.description || article.excerpt}
+  canonical={`/blog/${canonicalSlug}`}
+>
+  <div class="min-h-screen overflow-x-hidden bg-black text-white">
+    <Header currentPathname={Astro.url.pathname} />
+
+    <main class="mx-auto max-w-360 px-4 pb-24 pt-36 sm:px-6 lg:px-8">
+      <div class="grid items-start gap-10 xl:grid-cols-[150px_minmax(0,1fr)]">
+        <div aria-hidden="true" class="hidden xl:block"></div>
+
+        <div class="xl:col-start-2">
+          <div
+            class="grid items-start gap-10 xl:grid-cols-[minmax(0,1fr)_306px]"
+          >
+            <article class="min-w-0">
+              <div class="mb-8 flex flex-wrap items-center gap-3">
+                <a
+                  href="/blog/"
+                  class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/3 px-2 py-1 text-sm text-[#C9CBD0] transition-colors duration-200 hover:border-brand-blue-light/40 hover:text-brand-blue-light"
+                >
+                  <span aria-hidden="true">←</span>
+                </a>
+
+                <nav
+                  aria-label="Breadcrumb"
+                  class="flex min-w-0 items-center gap-2 text-sm text-[#A0A4AC]"
+                >
+                  <a
+                    href="/blog/"
+                    class="truncate transition-colors duration-200 hover:text-brand-blue-light"
+                  >
+                    Blogs
+                  </a>
+                  <span aria-hidden="true">/</span>
+                  <span class="truncate text-[#D7DAE0]">{article.title}</span>
+                </nav>
+              </div>
+
+              <header class="max-w-189">
+                <h1
+                  class="mt-6 text-[clamp(2.25rem,3.6vw,3rem)] leading-[1.17] font-semibold tracking-[-0.8px] text-white"
+                >
+                  {article.title}
+                </h1>
+
+                <p
+                  class="mt-4 text-[clamp(1.125rem,2vw,1.5rem)] leading-snug tracking-normal text-[#E4E5E7]"
+                >
+                  {article.excerpt}
+                </p>
+                <div
+                  class="mt-6 flex items-center justify-between gap-3 border-t-2 border-white/10 px-2 py-6"
+                >
+                  <div class="min-w-0 flex items-center gap-1.75">
+                    <img
+                      src={authorAvatar}
+                      alt={authorName}
+                      loading="lazy"
+                      decoding="async"
+                      onerror={AVATAR_FALLBACK_ON_ERROR}
+                      class="h-6.75 w-6.75 shrink-0 rounded-full bg-[#0F1623] object-cover"
+                    />
+
+                    <span
+                      class="truncate text-[12.6px] leading-[15.75px] font-medium tracking-[-0.252px] text-[#EFEFF0]"
+                    >
+                      {authorName}
+                    </span>
+                  </div>
+
+                  <time
+                    datetime={articleDate.toISOString()}
+                    class="shrink-0 text-[13px] leading-3.25 tracking-[0.26px] text-[#C9CBD0]"
+                  >
+                    {publishedAt}
+                  </time>
+                </div>
+              </header>
+
+              <figure
+                class="max-w-189 overflow-hidden rounded-2xl bg-[#181818]"
+              >
+                <img
+                  src={articleImage}
+                  alt={article.title}
+                  loading="lazy"
+                  decoding="async"
+                  onerror={IMAGE_FALLBACK_ON_ERROR}
+                  class="h-auto w-full object-cover"
+                />
+              </figure>
+
+              <div class="single-post-content mt-6 max-w-189">
+                <div set:html={articleHtml} />
+              </div>
+
+              <section class="mt-14 max-w-274.5 border-t border-white/10 pt-6">
+                <p
+                  class="text-[10.8px] leading-[10.8px] tracking-[0.216px] text-brand-blue-light"
+                >
+                  More from Zeustra
+                </p>
+
+                <div class="mt-5 grid gap-9 md:grid-cols-2 xl:grid-cols-3">
+                  {
+                    relatedCards.map((card) => (
+                      <article class="group">
+                        <a
+                          href={`/blog/${card.slug}/`}
+                          data-astro-prefetch
+                          class="block overflow-hidden rounded-[7.6px] bg-[#181818]"
+                        >
+                          <img
+                            src={card.image}
+                            alt={card.title}
+                            loading="lazy"
+                            decoding="async"
+                            onerror={IMAGE_FALLBACK_ON_ERROR}
+                            class="h-[179.55px] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                          />
+                        </a>
+
+                        <div class="mt-4.5 flex items-center gap-2">
+                          <span class="text-[11.7px] leading-[11.7px] font-medium tracking-[-0.234px] text-transparent bg-linear-to-r from-[#0D66A5] to-[#4DB5FF] bg-clip-text">
+                            {card.category}
+                          </span>
+                          <span class="h-[2.7px] w-[2.7px] rounded-full bg-[#494B50]" />
+                          <time
+                            class="text-[11.7px] leading-[11.7px] tracking-[-0.234px] text-[#9497A0]"
+                            datetime={card.publishDateISO}
+                          >
+                            {card.publishDateLabel}
+                          </time>
+                        </div>
+
+                        <a
+                          href={`/blog/${card.slug}/`}
+                          data-astro-prefetch
+                          class="mt-3 block text-[18px] leading-[24.75px] font-medium tracking-[-0.72px] text-white transition-colors duration-200 hover:text-brand-blue-light"
+                        >
+                          {card.title}
+                        </a>
+
+                        <div class="mt-2 flex items-center gap-1.75">
+                          <img
+                            src={card.avatar}
+                            alt={card.author}
+                            loading="lazy"
+                            decoding="async"
+                            onerror={AVATAR_FALLBACK_ON_ERROR}
+                            class="h-6.75 w-6.75 rounded-full bg-[#0F1623] object-cover"
+                          />
+                          <span class="text-[12.6px] leading-[15.75px] font-medium tracking-[-0.252px] text-[#EFEFF0]">
+                            {card.author}
+                          </span>
+                        </div>
+                      </article>
+                    ))
+                  }
+                </div>
+              </section>
+            </article>
+
+            <aside class="xl:w-76.5 xl:self-start">
+              <div
+                class="space-y-10 xl:fixed xl:top-32 xl:w-76.5 xl:max-h-[calc(100vh-9rem)] xl:overflow-y-auto xl:pr-1 xl:right-[max(2rem,calc((100vw-90rem)/2+2rem))]"
+              >
+                <section class="border-y-2 border-white/6 py-4 px-2">
+                  <div class="flex items-center justify-between">
+                    <p class="text-base leading-4 text-[#C9CBD0]">Share:</p>
+
+                    <ul class="flex items-center gap-4 text-[#AFB1B6]">
+                      <li>
+                        <a
+                          href={shareLinks.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Share on X (Twitter)"
+                          class="inline-flex h-4 w-4 items-center justify-center transition-colors duration-200 hover:text-brand-blue-light"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="h-4 w-4"
+                          >
+                            <path
+                              d="M18.901 1.153h3.68l-8.038 9.186L24 22.847h-7.406l-5.8-7.585-6.637 7.585H.477l8.596-9.826L0 1.154h7.594l5.243 6.932L18.901 1.153Zm-1.291 19.492h2.04L6.486 3.24H4.297L17.61 20.645Z"
+                            ></path>
+                          </svg>
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href={shareLinks.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Share on Facebook"
+                          class="inline-flex h-4 w-4 items-center justify-center transition-colors duration-200 hover:text-brand-blue-light"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="h-4 w-4"
+                          >
+                            <path
+                              d="M13.5 8.25V6.75c0-.621.504-1.125 1.125-1.125H16.5V2.25h-2.625A4.875 4.875 0 0 0 9 7.125V8.25H6v3.75h3V21.75h4.5V12h3.375L18 8.25h-4.5Z"
+                            ></path>
+                          </svg>
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href={shareLinks.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Share on LinkedIn"
+                          class="inline-flex h-4 w-4 items-center justify-center transition-colors duration-200 hover:text-brand-blue-light"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="h-4 w-4"
+                          >
+                            <path
+                              d="M6.94 8.5a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4ZM4.9 9.9h4.1v9.2H4.9V9.9Zm6.3 0h3.94v1.26h.06c.55-1.04 1.9-2.14 3.92-2.14 4.19 0 4.96 2.76 4.96 6.34v3.74h-4.1v-3.31c0-.79-.01-1.8-1.1-1.8-1.1 0-1.27.86-1.27 1.74v3.37h-4.1V9.9h-.01Z"
+                            ></path>
+                          </svg>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </section>
+
+                <section
+                  class="relative overflow-hidden rounded-[10px] border border-white/10 bg-[#101013] px-3.5 pb-3.25 pt-3.5 shadow-[0_2px_30px_rgba(0,0,0,0.50),0_2px_10px_rgba(0,0,0,0.40)]"
+                >
+                  <div
+                    class="pointer-events-none absolute inset-0 rounded-[10px] bg-[radial-gradient(circle_at_50%_45%,rgba(21,40,40,0.90)_0%,rgba(21,40,40,0.0)_72%)]"
+                  >
+                  </div>
+
+                  <div class="relative z-10">
+                    <h2
+                      class="max-w-46.5 text-[15px] leading-[20.63px] font-medium tracking-[-0.6px] text-white"
+                    >
+                      Subscribe to our changelog.<br />No spam, guaranteed.
+                    </h2>
+
+                    <form class="mt-[13.62px]" action="#" method="post">
+                      <label for="single-post-newsletter-email" class="sr-only">
+                        Email address
+                      </label>
+
+                      <div
+                        class="relative h-9.5 rounded-full border border-[#242628] bg-[#0C0D0D]"
+                      >
+                        <input
+                          id="single-post-newsletter-email"
+                          type="email"
+                          name="email"
+                          required
+                          placeholder="Your email..."
+                          class="h-full w-full bg-transparent pl-4.25 pr-21.5 text-[13px] tracking-[-0.26px] text-[#AFB1B6] outline-none placeholder:text-[#AFB1B699]"
+                        />
+
+                        <button
+                          type="submit"
+                          aria-label="Subscribe to newsletter"
+                          class="absolute right-1 top-1 inline-flex h-7.5 w-16.5 items-center justify-center rounded-full bg-linear-to-r from-[#0D66A5] to-[#4DB5FF] text-[#0C0D0D] transition-all duration-200 hover:brightness-110"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 18 18"
+                            fill="none"
+                          >
+                            <path
+                              d="M16.3446 1.65405C16.1776 1.48586 15.9672 1.36735 15.7367 1.31174C15.5063 1.25612 15.265 1.26557 15.0396 1.33905L2.11663 5.49305C1.87835 5.56707 1.66715 5.70963 1.5094 5.90295C1.35166 6.09627 1.25435 6.33177 1.22963 6.58005C1.17363 7.09205 1.41663 7.57205 1.86163 7.83105L6.43763 10.501L10.3906 6.54605C10.4603 6.47638 10.543 6.42112 10.634 6.38342C10.725 6.34571 10.8226 6.32631 10.9211 6.32631C11.0197 6.32631 11.1172 6.34571 11.2082 6.38342C11.2993 6.42112 11.382 6.47638 11.4516 6.54605C11.5213 6.61572 11.5766 6.69842 11.6143 6.78944C11.652 6.88047 11.6714 6.97803 11.6714 7.07655C11.6714 7.17507 11.652 7.27263 11.6143 7.36365C11.5766 7.45468 11.5213 7.53738 11.4516 7.60705L7.49763 11.561L10.1676 16.137C10.2913 16.3535 10.476 16.5288 10.6987 16.641C10.9213 16.7532 11.172 16.7974 11.4196 16.768C11.6676 16.7432 11.9028 16.646 12.0959 16.4884C12.289 16.3309 12.4315 16.12 12.5056 15.882L16.6606 2.96005C16.733 2.73434 16.7418 2.49305 16.6861 2.26266C16.6303 2.03227 16.5122 1.82169 16.3446 1.65405Z"
+                              fill="#0C0D0D"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </section>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>
+
+<style is:global>
+  .single-post-content > *:first-child {
+    margin-top: 0;
+  }
+
+  .single-post-content > *:last-child {
+    margin-bottom: 0;
+  }
+
+  .single-post-content p {
+    margin: 0 0 1.375rem;
+    color: #e4e5e7;
+    font-size: 18px;
+    line-height: 27px;
+    letter-spacing: 0;
+  }
+
+  .single-post-content h2 {
+    margin: 2.1rem 0 0.95rem;
+    color: #ffffff;
+    font-size: clamp(1.65rem, 2.2vw, 2rem);
+    line-height: 1.2;
+    letter-spacing: -0.6px;
+    font-weight: 600;
+  }
+
+  .single-post-content h3 {
+    margin: 1.8rem 0 0.85rem;
+    color: #ffffff;
+    font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+    line-height: 1.25;
+    letter-spacing: -0.4px;
+    font-weight: 600;
+  }
+
+  /* Base list styles */
+  .single-post-content ul,
+  .single-post-content ol {
+    margin: 0 0 1.375rem;
+    padding-left: 0;
+    color: #e4e5e7;
+    font-size: 18px;
+    line-height: 27px;
+    list-style: none;
+  }
+
+  /* Custom bullet points - solid filled brand blue dots */
+  .single-post-content ul li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .single-post-content ul li::before {
+    content: "";
+    position: absolute;
+    left: 0.5rem;
+    top: 0.65rem;
+    width: 6px;
+    height: 6px;
+    background: #4db5ff;
+    border-radius: 50%;
+  }
+
+  /* Ordered lists keep numbers */
+  .single-post-content ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+  }
+
+  .single-post-content ol li {
+    padding-left: 0;
+  }
+
+  .single-post-content ol li::before {
+    display: none;
+  }
+
+  .single-post-content li + li {
+    margin-top: 0.45rem;
+  }
+
+  /* Nested lists - hierarchical indentation */
+  .single-post-content li > ul,
+  .single-post-content li > ol {
+    margin: 0.5rem 0 0.75rem;
+  }
+
+  .single-post-content li > ul {
+    padding-left: 0;
+  }
+
+  .single-post-content li > ol {
+    list-style-type: lower-alpha;
+    padding-left: 1.5rem;
+  }
+
+  /* Third level nesting */
+  .single-post-content li > ul > li > ul li::before {
+    width: 5px;
+    height: 5px;
+  }
+
+  .single-post-content li > ol > li > ol {
+    list-style-type: lower-roman;
+  }
+
+  /* Task/checkbox lists */
+  .single-post-content ul[data-type="taskList"],
+  .single-post-content ul.contains-task-list {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  .single-post-content ul[data-type="taskList"] li,
+  .single-post-content ul.contains-task-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .single-post-content ul[data-type="taskList"] li > label,
+  .single-post-content ul.contains-task-list li > label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .single-post-content ul[data-type="taskList"] input[type="checkbox"],
+  .single-post-content ul.contains-task-list input[type="checkbox"] {
+    accent-color: #4db5ff;
+    width: 1rem;
+    height: 1rem;
+    cursor: default;
+  }
+
+  .single-post-content blockquote {
+    margin: 2rem 0;
+    border-left: 2px solid #f0f075;
+    padding: 0.15rem 0 0.15rem 1.15rem;
+    color: #e4e5e7;
+    font-size: 18px;
+    line-height: 27px;
+    font-weight: 600;
+  }
+
+  .single-post-content a {
+    color: #4db5ff;
+    text-decoration: underline;
+    text-decoration-color: rgba(77, 181, 255, 0.45);
+    text-underline-offset: 3px;
+  }
+
+  .single-post-content a:hover {
+    color: #79c9ff;
+    text-decoration-color: rgba(121, 201, 255, 0.7);
+  }
+
+  .single-post-content img {
+    margin: 1.8rem 0;
+    border-radius: 16px;
+  }
+
+  .single-post-content hr {
+    margin: 2rem 0;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Code blocks */
+  .single-post-content pre {
+    margin: 1.8rem 0;
+    padding: 1.25rem;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    overflow-x: auto;
+  }
+
+  .single-post-content pre code {
+    font-family:
+      ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #c9d1d9;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  /* Inline code */
+  .single-post-content code {
+    font-family:
+      ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.875em;
+    color: #4db5ff;
+    background: rgba(77, 181, 255, 0.1);
+    padding: 0.2em 0.4em;
+    border-radius: 6px;
+  }
+
+  .single-post-content pre code {
+    color: #c9d1d9;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* Text colors (Tiptap Color extension) */
+  .single-post-content [style*="color:"] {
+    /* Respect inline color styles from Tiptap */
+  }
+
+  /* Highlight (Tiptap Highlight extension) */
+  .single-post-content mark {
+    background: rgba(240, 204, 0, 0.4);
+    color: inherit;
+    padding: 0.1em 0.2em;
+    border-radius: 3px;
+  }
+
+  /* Tables */
+  .single-post-content table {
+    width: 100%;
+    margin: 1.8rem 0;
+    border-collapse: collapse;
+    font-size: 16px;
+  }
+
+  .single-post-content th,
+  .single-post-content td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border: 1px solid #30363d;
+  }
+
+  .single-post-content th {
+    background: rgba(255, 255, 255, 0.05);
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .single-post-content td {
+    color: #e4e5e7;
+  }
+
+  .single-post-content tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  /* Text alignment */
+  .single-post-content [style*="text-align: center"] {
+    text-align: center;
+  }
+
+  .single-post-content [style*="text-align: right"] {
+    text-align: right;
+  }
+
+  .single-post-content [style*="text-align: justify"] {
+    text-align: justify;
+  }
+
+  /* Underline from Tiptap */
+  .single-post-content u {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 1023px) {
+    .single-post-content p,
+    .single-post-content ul,
+    .single-post-content ol,
+    .single-post-content blockquote,
+    .single-post-content table {
+      font-size: 16px;
+      line-height: 24px;
+    }
+
+    .single-post-content pre {
+      padding: 1rem;
+    }
+
+    .single-post-content pre code {
+      font-size: 13px;
+    }
+
+    .single-post-content th,
+    .single-post-content td {
+      padding: 0.5rem 0.75rem;
+    }
+  }
+</style>

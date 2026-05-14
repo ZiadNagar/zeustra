@@ -1,0 +1,23 @@
+---
+type ServiceCardStatsAlign = "center" | "spread" | "start" | "end";
+
+type Props = {
+  align?: ServiceCardStatsAlign;
+  className?: string;
+};
+
+const { align = "center", className = "" } = Astro.props as Props;
+
+const alignClasses: Record<ServiceCardStatsAlign, string> = {
+  center: "justify-center",
+  spread: "justify-between",
+  start: "justify-start",
+  end: "justify-end",
+};
+---
+
+<div
+  class={`my-auto flex items-end gap-4 sm:gap-12 ${alignClasses[align]} ${className}`}
+>
+  <slot />
+</div>

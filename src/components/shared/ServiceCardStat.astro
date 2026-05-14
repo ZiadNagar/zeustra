@@ -1,0 +1,29 @@
+---
+type ServiceCardStatAlign = "center" | "start" | "end";
+
+type Props = {
+  value: string;
+  label: string;
+  align?: ServiceCardStatAlign;
+  className?: string;
+};
+
+const { value, label, align = "center", className = "" } = Astro.props as Props;
+
+const alignClasses: Record<ServiceCardStatAlign, string> = {
+  center: "items-center",
+  start: "items-start",
+  end: "items-end",
+};
+---
+
+<div class={`flex flex-col gap-1 ${alignClasses[align]} ${className}`}>
+  <span class="text-[clamp(1.5rem,2.5vw,2.5rem)] font-semibold text-white">
+    {value}
+  </span>
+  <span
+    class="whitespace-nowrap text-[clamp(0.75rem,1.5vw,1rem)] text-slate-300"
+  >
+    {label}
+  </span>
+</div>

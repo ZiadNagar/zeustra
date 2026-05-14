@@ -1,0 +1,87 @@
+---
+import HeaderInteractiveIsland from "@/components/islands/HeaderInteractiveIsland";
+import { NAVIGATION_ITEMS } from "@/constants/navigation";
+
+type HeaderSubItem = {
+  href: string;
+  label: string;
+};
+
+type HeaderNavItem = {
+  label: string;
+  href: string;
+  hasDropdown: boolean;
+  subItems?: HeaderSubItem[];
+};
+
+type HeaderProps = {
+  currentPathname?: string;
+};
+
+const { currentPathname } = Astro.props as HeaderProps;
+const headerNavItems = NAVIGATION_ITEMS as HeaderNavItem[];
+
+const normalizePathname = (pathname: string = "/"): string => {
+  if (!pathname || pathname === "/") {
+    return "/";
+  }
+
+  return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+};
+
+const pathname = normalizePathname(currentPathname ?? "/");
+
+const isActiveRoute = (href: string): boolean =>
+  normalizePathname(href) === pathname;
+
+const isNavItemActive = (item: HeaderNavItem): boolean => {
+  if (item.hasDropdown && item.subItems?.length) {
+    return item.subItems.some((subItem) => isActiveRoute(subItem.href));
+  }
+
+  return isActiveRoute(item.href);
+};
+---
+
+<header
+  class="fixed top-0 left-0 z-50 w-full min-w-full border-b bg-black/25 backdrop-blur-xl border-neutral-900"
+>
+  <div class="px-4 mx-auto max-w-header">
+    <nav class="flex items-center justify-between h-25">
+      <a href="/" class="flex items-center transition-opacity hover:opacity-80">
+        <img
+          src="/assets/images/brand/zeustra-logo.svg"
+          alt="Zeustra"
+          class="w-40 sm:w-48 md:w-56"
+        />
+      </a>
+
+      <div class="items-center hidden gap-4 sm:gap-6 nav:gap-8 nav:flex">
+        {
+          headerNavItems.map((item) => (
+            <div class="relative">
+              <a
+                href={item.href}
+                class={`group cursor-pointer rounded-full px-5 py-2.5 transition-colors hover:bg-white/5 ${
+                  isNavItemActive(item) ? "bg-white/5" : ""
+                }`}
+              >
+                <span
+                  class={`text-center text-base font-medium leading-tight transition-colors duration-300 ${
+                    isNavItemActive(item)
+                      ? "text-brand-blue-light"
+                      : "text-white group-hover:text-brand-blue-light"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </a>
+            </div>
+          ))
+        }
+      </div>
+
+      <HeaderInteractiveIsland client:load currentPathname={currentPathname} />
+    </nav>
+  </div>
+</header>

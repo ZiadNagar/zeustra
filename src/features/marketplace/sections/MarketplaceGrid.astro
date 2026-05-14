@@ -1,0 +1,100 @@
+---
+import ServiceCard from "@/components/shared/ServiceCard.astro";
+import ServiceCardContent from "@/components/shared/ServiceCardContent.astro";
+import ServiceCardDescription from "@/components/shared/ServiceCardDescription.astro";
+import ServiceCardHeader from "@/components/shared/ServiceCardHeader.astro";
+import ServiceCardIcon from "@/components/shared/ServiceCardIcon.astro";
+import ServiceCardImage from "@/components/shared/ServiceCardImage.astro";
+import ServiceCardTitle from "@/components/shared/ServiceCardTitle.astro";
+import { MARKETPLACE_BENTO_DATA } from "../data/marketplaceData";
+
+const hasCards =
+  Array.isArray(MARKETPLACE_BENTO_DATA) && MARKETPLACE_BENTO_DATA.length > 0;
+const firstCard = hasCards ? MARKETPLACE_BENTO_DATA[0] : undefined;
+const remainingCards = hasCards ? MARKETPLACE_BENTO_DATA.slice(1, 9) : [];
+---
+
+{
+  hasCards && (
+    <section class="relative w-full overflow-hidden py-20 sm:py-24 lg:py-32">
+      <div class="relative z-10 mx-auto max-w-360 px-4 sm:px-6 lg:px-8">
+        <div class="mb-16 text-center sm:mb-20">
+          <h2 class="text-display-lg-alt text-white">
+            The operating system that drives
+            <span
+              class="text-display-lg-alt bg-linear-to-r from-brand-cyan via-brand-blue-std to-brand-blue-light bg-clip-text text-transparent"
+              style="text-shadow: var(--shadow-hero-accent); font-weight: 700;"
+            >
+              the market
+            </span>
+          </h2>
+          <p class="mx-auto mt-4 text-[clamp(16px,2vw,24px)] leading-relaxed text-slate-300 sm:mt-6">
+            Core components working together to create liquidity, intelligence,
+            and coordinated transaction execution.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          {firstCard && (
+            <div
+              class="group relative grid cursor-default grid-cols-1 gap-12 overflow-hidden rounded-2xl border border-white/6 p-6 backdrop-blur-sm transition-all duration-500 hover:border-brand-blue/30 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] md:grid-cols-2 lg:p-8 xl:p-10"
+              style="background: rgba(17, 19, 24, 0.60);"
+            >
+              <div class="flex flex-col justify-center gap-4">
+                {firstCard.icon && (
+                  <img
+                    src={firstCard.icon}
+                    alt={firstCard.heading}
+                    class="h-12 w-12"
+                  />
+                )}
+                <h3 class="text-[clamp(1rem,2vw,1.25rem)] font-bold text-white transition-colors duration-300 group-hover:text-brand-blue-deep">
+                  {firstCard.heading}
+                </h3>
+                <p class="text-[clamp(0.5rem,2vw,1rem)] text-slate-300">
+                  {firstCard.paragraph}
+                </p>
+              </div>
+              {firstCard.image && (
+                <div class="flex items-center justify-center overflow-hidden">
+                  <img
+                    src={firstCard.image}
+                    alt={firstCard.heading}
+                    class="max-h-75 w-full object-contain"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {remainingCards.length > 0 && (
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {remainingCards.map((card) => (
+                <ServiceCard variant="gradient" link="#" className="h-full">
+                  <ServiceCardHeader className="mb-3">
+                    {card.icon && (
+                      <ServiceCardIcon
+                        src={card.icon}
+                        alt={card.heading}
+                        className="h-10 w-10"
+                      />
+                    )}
+                  </ServiceCardHeader>
+                  <ServiceCardContent>
+                    <ServiceCardTitle>{card.heading}</ServiceCardTitle>
+                    <ServiceCardDescription>
+                      {card.paragraph}
+                    </ServiceCardDescription>
+                  </ServiceCardContent>
+                  {card.image && (
+                    <ServiceCardImage src={card.image} alt={card.heading} />
+                  )}
+                </ServiceCard>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}

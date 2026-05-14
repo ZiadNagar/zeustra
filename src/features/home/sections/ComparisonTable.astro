@@ -1,0 +1,119 @@
+---
+import { SECTION_HEADERS, COMPARISON_DATA } from "../data/homePageData";
+import ComparisonCell from "./ComparisonCell.astro";
+
+const heading = SECTION_HEADERS.comparisonTable;
+const rows = COMPARISON_DATA;
+---
+
+<section class="bg-transparent py-16 md:py-24 lg:py-32">
+  <div class="mx-auto max-w-7xl px-4">
+    <div class="space-y-4 text-center">
+      <div class="mx-auto max-w-6xl space-y-4">
+        <h2
+          class="text-2xl leading-tight font-medium tracking-tight text-slate-50 sm:text-3xl lg:text-[48px] lg:leading-18 lg:tracking-[-2.16px]"
+        >
+          <span
+            class="bg-linear-to-r from-brand-cyan to-brand-blue-light bg-clip-text font-bold text-transparent"
+            style="text-shadow:0px 0px 30px rgba(0,238,255,0.8),0px 0px 60px rgba(77,181,255,0.6);"
+          >
+            {heading.highlightWord}
+          </span>
+          {" "}
+          {heading.headingSuffix}
+        </h2>
+        <p
+          class="px-4 text-sm font-normal text-slate-300 sm:text-lg lg:text-[24px]"
+        >
+          {heading.subtitle}
+        </p>
+      </div>
+    </div>
+
+    <div
+      class="mt-14 overflow-hidden rounded-2xl border border-[rgba(59,130,246,0.2)] bg-[rgba(15,23,42,0.8)] shadow-[0px_0px_50px_0px_rgba(5,5,39,0.5)] backdrop-blur-[10px]"
+    >
+      <div
+        class="flex flex-col border-b border-[rgba(59,130,246,0.2)] p-4 sm:flex-row sm:items-center sm:justify-between md:p-6"
+      >
+        <h3
+          class="bg-linear-to-r from-brand-blue-deep to-brand-blue-light bg-clip-text text-center text-lg font-bold text-transparent sm:text-left md:text-2xl"
+        >
+          Platform Comparison Matrix
+        </h3>
+      </div>
+
+      <div class="overflow-x-auto p-4 md:p-6">
+        <table class="w-full min-w-240 border-collapse">
+          <thead>
+            <tr class="border-b border-[rgba(96,165,250,0.5)]">
+              <th
+                class="w-50 bg-linear-to-r from-[rgba(30,41,59,0.5)] to-[rgba(51,65,85,0.5)] p-4 text-left text-sm font-bold text-blue-200 xl:p-6 xl:text-base"
+              >
+                Feature
+              </th>
+              <th
+                class="w-[320px] bg-linear-to-r from-[rgba(6,78,59,0.3)] to-[rgba(20,83,45,0.3)] p-4 text-center xl:p-6"
+              >
+                <div class="flex items-center justify-center space-x-2">
+                  <span class="text-sm font-bold text-blue-200 xl:text-base"
+                    >Zeustra</span
+                  >
+                </div>
+              </th>
+              <th
+                class="w-70 bg-linear-to-r from-[rgba(30,41,59,0.3)] to-[rgba(51,65,85,0.3)] p-4 text-center xl:p-6"
+              >
+                <div class="text-sm font-bold text-blue-200 xl:text-base">
+                  Traditional Brokers
+                </div>
+                <p class="mt-1 text-xs text-blue-200/75">
+                  (CBRE, JLL, Cushman, M&amp;M)
+                </p>
+              </th>
+              <th
+                class="w-75 bg-linear-to-r from-[rgba(30,41,59,0.3)] to-[rgba(51,65,85,0.3)] p-4 text-center xl:p-6"
+              >
+                <div class="text-sm font-bold text-blue-200 xl:text-base">
+                  3rd-Party Marketplaces
+                </div>
+                <p class="mt-1 text-xs text-blue-200/75">(LoopNet, Crexi)</p>
+              </th>
+              <th
+                class="w-75 bg-linear-to-r from-[rgba(30,41,59,0.3)] to-[rgba(51,65,85,0.3)] p-4 text-center xl:p-6"
+              >
+                <div class="text-sm font-bold text-blue-200 xl:text-base">
+                  Paid SaaS Platforms
+                </div>
+                <p class="mt-1 text-xs text-blue-200/75">(CoStar, Yardi)</p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              rows.map((row) => (
+                <tr class="border-b border-white/5 transition-colors duration-200 hover:bg-white/3">
+                  <td class="bg-linear-to-r from-[rgba(30,41,59,0.2)] to-[rgba(51,65,85,0.2)] p-4 text-sm font-bold text-slate-50 xl:p-6 xl:text-base">
+                    {row.feature}
+                  </td>
+                  <td class="bg-linear-to-r from-[rgba(6,78,59,0.1)] to-[rgba(20,83,45,0.1)] p-4 text-center text-xs leading-relaxed font-semibold xl:p-6 xl:text-sm">
+                    <ComparisonCell text={row.zeustra} />
+                  </td>
+                  <td class="p-4 text-center text-xs leading-relaxed font-medium xl:p-6 xl:text-sm">
+                    <ComparisonCell text={row.traditional} />
+                  </td>
+                  <td class="p-4 text-center text-xs leading-relaxed font-medium xl:p-6 xl:text-sm">
+                    <ComparisonCell text={row.thirdPartyMarketplace} />
+                  </td>
+                  <td class="p-4 text-center text-xs leading-relaxed font-medium xl:p-6 xl:text-sm">
+                    <ComparisonCell text={row.thirdPartySaas} />
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

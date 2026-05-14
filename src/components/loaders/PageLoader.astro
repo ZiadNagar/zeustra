@@ -1,0 +1,309 @@
+---
+interface Props {
+  logoSrc?: string;
+  loadingText?: string;
+}
+
+const { logoSrc = "/assets/zeustra-loader-icon.svg", loadingText = "Loading" } =
+  Astro.props;
+---
+
+<div class="gooey-orbital-loader" role="status" aria-live="polite" data-page-loader>
+  <span class="gooey-orbital-loader__sr-only">{loadingText}</span>
+  <div class="gooey-orbital-loader__stage">
+    <svg
+      class="gooey-orbital-loader__svg"
+      viewBox="0 0 700 700"
+      aria-hidden="true"
+    >
+      <defs>
+        <symbol id="gooey-orbital-dot">
+          <circle cx="30" cy="30" r="30"></circle>
+        </symbol>
+        <filter id="gooey-orbital-goo">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"
+          ></feGaussianBlur>
+          <feColorMatrix
+            in="blur"
+            mode="matrix"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+            result="goo"></feColorMatrix>
+          <feComposite in="SourceGraphic" in2="goo" operator="atop"
+          ></feComposite>
+        </filter>
+        <filter
+          id="gooey-orbital-glow"
+          filterUnits="userSpaceOnUse"
+          x="-20%"
+          y="-20%"
+          height="140%"
+          width="140%"
+        >
+          <feGaussianBlur in="SourceGraphic" stdDeviation="8"></feGaussianBlur>
+        </filter>
+        <filter
+          id="gooey-orbital-outer-glow"
+          filterUnits="userSpaceOnUse"
+          x="-50%"
+          y="-50%"
+          height="220%"
+          width="220%"
+        >
+          <feGaussianBlur
+            in="SourceGraphic"
+            stdDeviation="20"
+            result="outer-glow"></feGaussianBlur>
+        </filter>
+      </defs>
+
+      <g class="circles centered">
+        <use class="dot" href="#gooey-orbital-dot" x="106" y="106"></use>
+        <use class="dot" href="#gooey-orbital-dot" x="0" y="150"></use>
+        <use class="dot" href="#gooey-orbital-dot" x="-106" y="106"></use>
+        <use class="dot" href="#gooey-orbital-dot" x="-150" y="0"></use>
+        <use class="dot" href="#gooey-orbital-dot" x="-106" y="-106"></use>
+        <use class="dot" href="#gooey-orbital-dot" x="0" y="-150"></use>
+        <use class="dot" href="#gooey-orbital-dot" x="106" y="-106"></use>
+        <use class="dot" href="#gooey-orbital-dot" x="150" y="0"></use>
+        <!-- cx/cy at (25,25) match former #moving-dot use x=-150 y=-150 + cx=175 cy=175 -->
+        <circle class="dot--light scanner" cx="25" cy="25" r="24"></circle>
+      </g>
+      <g class="centered">
+        <circle class="dot--glowing scanner" cx="25" cy="25" r="24"></circle>
+      </g>
+    </svg>
+
+    <div class="gooey-orbital-loader__logo-wrap">
+      <img
+        class="gooey-orbital-loader__logo"
+        src={logoSrc}
+        alt=""
+        width={90}
+        height={105}
+        decoding="async"
+      />
+    </div>
+  </div>
+</div>
+
+<style>
+  /*
+   * Astro scopes all selectors in this block automatically.
+   * SVG child elements (dot, scanner, circles, centered) live inside
+   * the same template so they receive the scoped data attribute too.
+   *
+   * Filter IDs (gooey-orbital-goo, etc.) are referenced as url("#…")
+   * inside inline SVG — those are HTML attributes, not CSS selectors,
+   * so they are unaffected by scoping and resolve correctly.
+   */
+
+  .gooey-orbital-loader {
+    /* One full orbit = one load cycle (matches MIN_BOOT_MS gate). */
+    --min-boot-ms: 800ms;
+    --fade-out-ms: 400ms;
+    --dot-radius: 30px;
+    --path-radius: 150px;
+    --vp-width: 700px;
+    --vp-height: 700px;
+    --static-dot-color: hsl(204, 86%, 60%);
+    --moving-dot-color: hsl(186, 88%, 62%);
+    --scan-duration: 3s;
+
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    background-color: #000;
+    transition: opacity var(--fade-out-ms) ease-out,
+      visibility var(--fade-out-ms) ease-out;
+  }
+
+  .gooey-orbital-loader--hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .gooey-orbital-loader__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .gooey-orbital-loader__stage {
+    position: relative;
+    isolation: isolate;
+    width: min(72vw, 380px);
+    max-width: 380px;
+    aspect-ratio: 1;
+    max-height: min(50vh, 380px);
+  }
+
+  .gooey-orbital-loader__svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .dot {
+    fill: var(--static-dot-color);
+  }
+
+  .dot--light {
+    fill: var(--moving-dot-color);
+    filter: url("#gooey-orbital-glow");
+    opacity: 0.88;
+  }
+
+  .dot--glowing {
+    fill: var(--moving-dot-color);
+    filter: url("#gooey-orbital-outer-glow");
+    opacity: 0.55;
+  }
+
+  .scanner {
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    animation: gooey-orbital-scan var(--scan-duration) linear infinite both;
+  }
+
+  .circles {
+    filter: url("#gooey-orbital-goo");
+  }
+
+  .centered {
+    transform: translate(
+      calc((var(--vp-width) * 0.5) - var(--dot-radius)),
+      calc((var(--vp-height) * 0.5) - var(--dot-radius))
+    );
+  }
+
+  .gooey-orbital-loader__logo-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .gooey-orbital-loader__logo {
+    width: min(30%, 132px);
+    height: auto;
+    max-height: min(28%, 155px);
+    object-fit: contain;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    /* Two gentle peaks per 3s orbit — no filter jumps = less repaint jank. */
+    animation: gooey-orbital-logo-pulse var(--scan-duration)
+      cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite both;
+  }
+
+  @keyframes gooey-orbital-scan {
+    from {
+      transform: rotate(0deg) translateY(calc(var(--path-radius) * -1))
+        rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg) translateY(calc(var(--path-radius) * -1))
+        rotate(-360deg);
+    }
+  }
+
+  /* Two soft pulses per revolution, phase-aligned to orbital period (3s). */
+  @keyframes gooey-orbital-logo-pulse {
+    0%,
+    50%,
+    100% {
+      transform: scale(1);
+    }
+    25% {
+      transform: scale(1.065);
+    }
+    75% {
+      transform: scale(1.065);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scanner {
+      animation-duration: 9s;
+    }
+
+    .gooey-orbital-loader__logo {
+      animation-duration: 9s;
+      animation-timing-function: ease-in-out;
+    }
+  }
+</style>
+
+<script>
+  const MIN_BOOT_MS = 800;
+  const FADE_OUT_MS = 400;
+
+  function showLoader() {
+    const loader = document.querySelector('[data-page-loader]');
+    if (!loader) return;
+
+    // Remove hidden class to show the loader
+    loader.classList.remove('gooey-orbital-loader--hidden');
+  }
+
+  function hideLoader() {
+    const loader = document.querySelector('[data-page-loader]');
+    if (!loader) return;
+
+    // Prevent multiple hide calls
+    if (loader.classList.contains('gooey-orbital-loader--hidden')) return;
+
+    // Add hidden class to trigger fade-out
+    loader.classList.add('gooey-orbital-loader--hidden');
+
+    // Remove from DOM after transition completes
+    setTimeout(() => {
+      loader.remove();
+    }, FADE_OUT_MS);
+  }
+
+  function bootAndHide() {
+    // Ensure minimum display time before hiding
+    const elapsed = performance.now();
+    const remaining = MIN_BOOT_MS - elapsed;
+
+    if (remaining > 0) {
+      setTimeout(hideLoader, remaining);
+    } else {
+      hideLoader();
+    }
+  }
+
+  // Initial page load - hide after content is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootAndHide);
+  } else {
+    bootAndHide();
+  }
+
+  // Astro ClientRouter (View Transitions) navigation
+  // Show loader when navigation starts
+  document.addEventListener('astro:before-preparation', () => {
+    showLoader();
+  });
+
+  // Hide loader when new page is ready
+  document.addEventListener('astro:page-load', bootAndHide);
+</script>

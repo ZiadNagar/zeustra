@@ -1,0 +1,55 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
+import { PAGE_SEO } from "@/data/pagesSeo";
+import { fetchPositions, type StrapiPositionRecord } from "@/lib/strapi";
+import CareersOpenPositionsSection from "@/features/careers/sections/CareersOpenPositionsSection";
+
+export const prerender = false;
+
+Astro.response.headers.set("Cache-Control", "no-store, max-age=0");
+const applicationEndpoint = "/api/applications/";
+
+const positionsResult = await fetchPositions({
+  activeOnly: true,
+  page: 1,
+  pageSize: 100,
+});
+const positions: StrapiPositionRecord[] = positionsResult.data.map((position) => ({
+  ...position,
+}));
+---
+
+<BaseLayout
+  title={PAGE_SEO.careers.title}
+  description={PAGE_SEO.careers.description}
+  keywords={PAGE_SEO.careers.keywords}
+  canonical={PAGE_SEO.careers.path}
+>
+  <div class="min-h-screen overflow-x-hidden bg-black text-white">
+    <Header currentPathname={Astro.url.pathname} />
+
+    <main class="relative flex-1 overflow-hidden bg-black pt-35 sm:pt-37">
+      <div
+        class="pointer-events-none absolute inset-0 z-0 h-[120dvh] w-screen"
+        style={{
+          backgroundImage: 'url("/assets/images/wavy-lines-background.svg")',
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+      </div>
+
+      <div class="relative z-10">
+        <CareersOpenPositionsSection
+          positions={positions}
+          applicationEndpoint={applicationEndpoint}
+          client:load
+        />
+      </div>
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>

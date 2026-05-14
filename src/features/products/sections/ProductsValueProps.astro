@@ -1,0 +1,81 @@
+---
+import ServiceCard from "@/components/shared/ServiceCard.astro";
+import ServiceCardContent from "@/components/shared/ServiceCardContent.astro";
+import ServiceCardDescription from "@/components/shared/ServiceCardDescription.astro";
+import ServiceCardHeader from "@/components/shared/ServiceCardHeader.astro";
+import ServiceCardIcon from "@/components/shared/ServiceCardIcon.astro";
+import ServiceCardImage from "@/components/shared/ServiceCardImage.astro";
+import ServiceCardStat from "@/components/shared/ServiceCardStat.astro";
+import ServiceCardStats from "@/components/shared/ServiceCardStats.astro";
+import ServiceCardTitle from "@/components/shared/ServiceCardTitle.astro";
+import { ProductsGridData } from "../data/productsPageData";
+---
+
+<section class="relative w-full overflow-hidden py-20 sm:py-24 lg:py-32">
+  <div
+    class="pointer-events-none absolute inset-0 z-0 h-ful w-full opacity-40"
+    style='background-image: url("/assets/images/wavy-lines-background.svg"); background-size: cover; background-repeat: no-repeat;'
+  >
+  </div>
+  <div
+    class="pointer-events-none absolute inset-0 -top-[45%] left-[45%] h-1/4 w-1/4 rounded-full bg-brand-cyan-light blur-[400px]"
+  >
+  </div>
+  <div class="relative z-10 mx-auto max-w-350 px-4 sm:px-6 lg:px-8">
+    <div class="mb-16 text-center sm:mb-20">
+      <h2 class="text-display-lg-alt text-white">
+        The Zeustra Platform
+        <span
+          class="text-display-lg-alt bg-linear-to-r from-brand-cyan via-brand-blue-std to-brand-blue-light bg-clip-text text-transparent"
+          style="text-shadow: var(--shadow-hero-accent); font-weight: 700;"
+        >
+          Advantage
+        </span>
+      </h2>
+      <p
+        class="mx-auto mt-4 max-w-4xl text-[clamp(16px,2vw,24px)] leading-relaxed text-slate-300 sm:mt-6"
+      >
+        A unified platform that connects every stakeholder through structured,
+        coordinated, and intelligent transaction execution.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {
+        ProductsGridData.slice(0, 4).map((item) => (
+          <ServiceCard
+            variant="default"
+            className="w-full"
+            style="background: rgba(17, 19, 24, 0.60);"
+            link="#"
+          >
+            <ServiceCardHeader className="mb-4">
+              <ServiceCardIcon
+                src={item.icon}
+                alt={item.heading}
+                className="h-12 w-12"
+              />
+            </ServiceCardHeader>
+            <ServiceCardContent className="mb-4">
+              <ServiceCardTitle>{item.heading}</ServiceCardTitle>
+              <ServiceCardDescription>{item.paragraph}</ServiceCardDescription>
+            </ServiceCardContent>
+            <ServiceCardImage
+              src={item.image}
+              alt={item.heading}
+              size="default"
+              className="my-4"
+            />
+            <ServiceCardStats align="start">
+              <ServiceCardStat
+                align="start"
+                value={item.stat.value}
+                label={item.stat.label}
+              />
+            </ServiceCardStats>
+          </ServiceCard>
+        ))
+      }
+    </div>
+  </div>
+</section>

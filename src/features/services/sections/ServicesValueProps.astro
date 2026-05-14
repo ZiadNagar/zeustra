@@ -1,0 +1,176 @@
+---
+import ServiceCard from "@/components/shared/ServiceCard.astro";
+import ServiceCardContent from "@/components/shared/ServiceCardContent.astro";
+import ServiceCardDescription from "@/components/shared/ServiceCardDescription.astro";
+import ServiceCardHeader from "@/components/shared/ServiceCardHeader.astro";
+import ServiceCardIcon from "@/components/shared/ServiceCardIcon.astro";
+import ServiceCardImage from "@/components/shared/ServiceCardImage.astro";
+import ServiceCardStat from "@/components/shared/ServiceCardStat.astro";
+import ServiceCardStats from "@/components/shared/ServiceCardStats.astro";
+import ServiceCardTitle from "@/components/shared/ServiceCardTitle.astro";
+import { valuePropsData } from "../data/servicesPageData";
+---
+
+<section class="relative h-full w-full overflow-hidden py-20 sm:py-24 lg:py-32">
+  <div
+    class="pointer-events-none absolute inset-0 z-0 h-ful w-full opacity-40"
+    style='background-image: url("/assets/images/wavy-lines-background.svg"); background-size: cover; background-repeat: no-repeat;'
+  >
+  </div>
+  <div
+    class="pointer-events-none absolute inset-0 -top-[45%] left-[45%] h-1/4 w-1/4 rounded-full bg-brand-cyan-light blur-[400px]"
+  >
+  </div>
+
+  <div class="relative z-10 mx-auto max-w-360 px-4 sm:px-6 lg:px-8">
+    <div class="mb-16 text-center sm:mb-20">
+      <h2 class="text-display-lg-alt text-white">
+        The
+        <span
+          class="text-display-lg-alt bg-linear-to-r from-brand-cyan via-brand-blue-std to-brand-blue-light bg-clip-text text-transparent"
+          style="text-shadow: var(--shadow-hero-accent); font-weight: 700;"
+        >
+          Zeustra
+        </span>
+        Advantage
+      </h2>
+      <p
+        class="mx-auto mt-4 text-[clamp(16px,2vw,24px)] leading-relaxed text-slate-300 sm:mt-6"
+      >
+        A unified platform that aligns global intelligence, strategy, and
+        marketplace participation to execute transactions with speed and
+        precision.
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-8 lg:grid-cols-12">
+        <div class="md:col-span-5 lg:col-span-7">
+          <ServiceCard
+            variant="default"
+            className="h-full bg-neutral-950"
+            link="#"
+          >
+            <ServiceCardHeader className="mb-4">
+              <ServiceCardIcon
+                src={valuePropsData[0].icon}
+                alt={valuePropsData[0].heading}
+                className="h-12 w-12"
+              />
+            </ServiceCardHeader>
+            <ServiceCardContent>
+              <ServiceCardTitle>{valuePropsData[0].heading}</ServiceCardTitle>
+              <ServiceCardDescription>
+                {valuePropsData[0].paragraph}
+              </ServiceCardDescription>
+            </ServiceCardContent>
+            <ServiceCardImage
+              src={valuePropsData[0].image}
+              alt={valuePropsData[0].heading}
+              size="large"
+              className="my-14 w-full"
+            />
+            <ServiceCardStats align="start">
+              <ServiceCardStat
+                align="start"
+                value={valuePropsData[0].stat.value}
+                label={valuePropsData[0].stat.label}
+              />
+            </ServiceCardStats>
+          </ServiceCard>
+        </div>
+
+        <div class="flex flex-col gap-4 md:col-span-3 lg:col-span-5">
+          <ServiceCard variant="gradient" link="#">
+            <ServiceCardHeader className="mb-3">
+              <ServiceCardIcon
+                src={valuePropsData[1].icon}
+                alt={valuePropsData[1].heading}
+                className="h-10 w-10"
+              />
+            </ServiceCardHeader>
+            <ServiceCardContent>
+              <ServiceCardTitle>{valuePropsData[1].heading}</ServiceCardTitle>
+              <ServiceCardDescription>
+                {valuePropsData[1].paragraph}
+              </ServiceCardDescription>
+            </ServiceCardContent>
+            <ServiceCardImage
+              src={valuePropsData[1].image}
+              alt={valuePropsData[1].heading}
+            />
+            <ServiceCardStats align="start">
+              <ServiceCardStat
+                align="start"
+                value={valuePropsData[1].stat.value}
+                label={valuePropsData[1].stat.label}
+              />
+            </ServiceCardStats>
+          </ServiceCard>
+          <ServiceCard variant="gradient" link="#">
+            <ServiceCardHeader className="mb-3">
+              <ServiceCardIcon
+                src={valuePropsData[2].icon}
+                alt={valuePropsData[2].heading}
+                className="h-10 w-10"
+              />
+            </ServiceCardHeader>
+            <ServiceCardContent>
+              <ServiceCardTitle>{valuePropsData[2].heading}</ServiceCardTitle>
+              <ServiceCardDescription>
+                {valuePropsData[2].paragraph}
+              </ServiceCardDescription>
+            </ServiceCardContent>
+            <div class="flex flex-row items-center justify-between gap-4">
+              <ServiceCardStat
+                align="start"
+                value={valuePropsData[2].stat.value}
+                label={valuePropsData[2].stat.label}
+              />
+              <ServiceCardStats align="end">
+                <ServiceCardImage
+                  src={valuePropsData[2].image}
+                  alt={valuePropsData[2].heading}
+                  className="flex-1"
+                />
+              </ServiceCardStats>
+            </div>
+          </ServiceCard>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-8 lg:grid-cols-12">
+        <div class="md:col-span-8 lg:col-span-12">
+          <ServiceCard variant="gradient" className="h-full" link="#">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+              <div class="flex flex-col">
+                <ServiceCardHeader className="mb-3">
+                  <ServiceCardIcon
+                    src={valuePropsData[3].icon}
+                    alt={valuePropsData[3].heading}
+                    className="h-10 w-10"
+                  />
+                </ServiceCardHeader>
+                <ServiceCardContent>
+                  <ServiceCardTitle
+                    >{valuePropsData[3].heading}</ServiceCardTitle
+                  >
+                  <ServiceCardDescription>
+                    {valuePropsData[3].paragraph}
+                  </ServiceCardDescription>
+                </ServiceCardContent>
+              </div>
+              <div class="flex items-center justify-center">
+                <ServiceCardImage
+                  src={valuePropsData[3].image}
+                  alt={valuePropsData[3].heading}
+                  className="max-w-full"
+                />
+              </div>
+            </div>
+          </ServiceCard>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

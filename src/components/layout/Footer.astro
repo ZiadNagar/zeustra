@@ -1,0 +1,105 @@
+---
+import { NAVIGATION_ITEMS } from "@/constants/navigation";
+import { publicEnv } from "@/utils/env";
+
+const currentYear = new Date().getFullYear();
+const navigationItems = NAVIGATION_ITEMS.filter((item) => item.href);
+---
+
+<footer class="border-t border-neutral-900 bg-black px-4 py-12 lg:py-20">
+  <div class="mx-auto max-w-360 px-4">
+    <div
+      class="grid w-full grid-cols-1 items-start gap-8 md:grid-cols-3 md:gap-4"
+    >
+      <div class="-mt-6 flex w-full justify-center md:justify-start">
+        <a
+          href="/"
+          data-astro-prefetch
+          class="transition-opacity hover:opacity-80"
+        >
+          <img
+            src="/assets/images/brand/zeustra-logo.svg"
+            alt="Zeustra"
+            width="212"
+            height="103"
+            loading="lazy"
+            decoding="async"
+            class="h-auto w-44"
+          />
+        </a>
+      </div>
+
+      <div
+        class="flex w-full flex-col items-center justify-start gap-6 md:gap-8"
+      >
+        <div
+          class="flex items-center justify-center gap-4 whitespace-nowrap sm:gap-6 md:gap-7"
+        >
+          {
+            navigationItems.map((item) => (
+              <a
+                href={item.href}
+                data-astro-prefetch
+                class="text-[15px] font-medium tracking-[-0.02em] text-slate-400 transition-colors duration-300 hover:text-brand-blue-light"
+              >
+                {item.label}
+              </a>
+            ))
+          }
+        </div>
+
+        <div
+          class="flex items-center justify-center gap-4 text-sm font-normal tracking-[-0.02em] text-slate-500"
+        >
+          <a
+            href="/terms/"
+            data-astro-prefetch
+            class="transition-colors duration-300 hover:text-brand-blue-light"
+          >
+            Terms and Conditions
+          </a>
+          <a
+            href="/privacy/"
+            data-astro-prefetch
+            class="transition-colors duration-300 hover:text-brand-blue-light"
+          >
+            Privacy and Policy
+          </a>
+        </div>
+
+        <div class="mt-2 flex items-center justify-center">
+          <a
+            href={publicEnv.linkedinUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group flex items-center justify-center space-x-3 text-[15px] font-normal tracking-[-0.02em] text-slate-400 transition-colors duration-300 hover:text-brand-blue-light"
+            aria-label="LinkedIn"
+          >
+            <img
+              src="/assets/icons/social/linkedin-icon.svg"
+              alt=""
+              width="20"
+              height="20"
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              class="h-5 w-5 transition-colors duration-300"
+            />
+            <span>LinkedIn</span>
+          </a>
+        </div>
+      </div>
+
+      <div
+        class="flex w-full flex-col items-center justify-start gap-3 text-center"
+      >
+        <div
+          class="flex flex-col gap-1 text-sm font-normal tracking-[-0.02em] text-slate-500"
+        >
+          <p>Made in SF and the World</p>
+          <p>Copyright Ⓒ 2022 - {currentYear} Zeustra, Inc.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

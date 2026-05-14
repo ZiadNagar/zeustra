@@ -1,0 +1,61 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { PAGE_SEO } from "@/data/pagesSeo";
+import Footer from "../components/layout/Footer.astro";
+import HomeTechStackSection from "../features/home/sections/HomeTechStackSection.astro";
+import {
+  SECTION_HEADERS,
+  COMPARISON_DATA,
+} from "@/features/home/data/homePageData";
+import HomeFeatures from "@/features/home/sections/Features";
+import HomeTargetAudience from "@/features/home/sections/TargetAudience";
+import HomeTestimonials from "@/features/home/sections/Testimonials";
+import HomeValuePropositions from "@/features/home/sections/ValuePropositions";
+import {
+  fetchTestimonials,
+  type TestimonialUiModel,
+} from "@/lib/strapi";
+import Header from "../components/layout/Header.astro";
+import Hero from "../features/home/sections/Hero";
+import ComparisonTableIsland from "../components/islands/ComparisonTableIsland";
+
+export const prerender = false;
+
+Astro.response.headers.set("Cache-Control", "no-store, max-age=0");
+
+const resolvedTestimonials = await fetchTestimonials();
+const serializedTestimonials: TestimonialUiModel[] = resolvedTestimonials.map(
+  (testimonial) => ({ ...testimonial }),
+);
+---
+
+<BaseLayout
+  title={PAGE_SEO.home.title}
+  description={PAGE_SEO.home.description}
+  keywords={PAGE_SEO.home.keywords}
+  canonical={PAGE_SEO.home.path}
+>
+  <div class="min-h-screen overflow-x-hidden bg-black text-white">
+    <Header currentPathname={Astro.url.pathname} />
+
+    <main class="flex-1 bg-black">
+      <Hero client:load />
+      <HomeFeatures client:load />
+      <HomeValuePropositions client:load />
+      <HomeTestimonials testimonials={serializedTestimonials} client:load />
+      <HomeTargetAudience client:load />
+      <HomeTechStackSection />
+      <ComparisonTableIsland
+        client:load
+        tableRows={COMPARISON_DATA}
+        subtitle={SECTION_HEADERS.comparisonTable.subtitle}
+        comparisonHeadingHighlight={SECTION_HEADERS.comparisonTable
+          .highlightWord}
+        comparisonHeadingSuffix={SECTION_HEADERS.comparisonTable.headingSuffix}
+        isHomePage={true}
+      />
+    </main>
+
+    <Footer />
+  </div>
+</BaseLayout>
