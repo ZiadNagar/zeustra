@@ -9,7 +9,7 @@ const ServicesHero = () => {
       ref={sectionRef}
       className="relative flex flex-col items-start justify-start w-full overflow-hidden"
     >
-      <div className="relative z-20 px-4 py-20 mx-auto max-w-360 sm:px-6 lg:px-8 mt-60">
+      <div className="relative z-20 px-4 py-20 mx-auto max-w-360 sm:px-6 lg:px-8 mt-36 sm:mt-48 lg:mt-60">
         <header className="mx-auto text-center">
           <h1 className="text-white text-display-xl">
             <span>Value Reimagined</span>
