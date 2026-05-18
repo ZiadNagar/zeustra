@@ -4,8 +4,7 @@ import { ChevronDown, Circle, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import ContactModal from "@/components/shared/ContactModal";
 import { NAVIGATION_ITEMS } from "@/constants/navigation";
-import { SchedulerModalProvider } from "@/contexts/SchedulerModalProvider";
-import { useSchedulerModal } from "@/contexts/schedulerModalContext";
+import { openScheduler } from "@/contexts/schedulerModalGlobals";
 
 type HeaderSubItem = {
   href: string;
@@ -52,7 +51,6 @@ const getCurrentPathname = (): string => {
 function HeaderInteractiveControls({
   currentPathname,
 }: HeaderInteractiveIslandProps): ReactElement {
-  const { openScheduler } = useSchedulerModal();
   const headerNavItems = NAVIGATION_ITEMS as HeaderNavItem[];
   const [pathname, setPathname] = useState<string>(() =>
     normalizePathname(currentPathname ?? getCurrentPathname()),
@@ -445,9 +443,5 @@ function HeaderInteractiveControls({
 export default function HeaderInteractiveIsland(
   props: HeaderInteractiveIslandProps,
 ): ReactElement {
-  return (
-    <SchedulerModalProvider>
-      <HeaderInteractiveControls {...props} />
-    </SchedulerModalProvider>
-  );
+  return <HeaderInteractiveControls {...props} />;
 }

@@ -22,11 +22,11 @@ const seo = PAGE_SEO.products;
     <Header currentPathname={Astro.url.pathname} />
 
     <main class="relative flex-1 bg-black">
-      <ProductsHero />
+      <ProductsHero client:load />
       <ProductsTechStack client:load />
       <ProductsLayers client:load />
       <ProductsValueProps />
-      <JoinTeamSection />
+      <JoinTeamSection client:load />
     </main>
 
     <Footer />

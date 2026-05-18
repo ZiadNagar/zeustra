@@ -1,7 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 
-import { SchedulerModalProvider } from "@/contexts/SchedulerModalProvider";
+import SchedulerModalShell from "@/components/shared/SchedulerModalShell";
 import PageLoader from "@/components/loaders/PageLoader.astro";
 
 import "@/styles/theme.css";
@@ -101,10 +101,9 @@ const fullTitle = title === "Zeustra" ? title : `${title} | Zeustra`;
   </head>
   <body>
     <PageLoader />
-    <SchedulerModalProvider client:load>
-      <div id="page-content">
-        <slot />
-      </div>
-    </SchedulerModalProvider>
+    <div id="page-content">
+      <slot />
+    </div>
+    <SchedulerModalShell client:load />
   </body>
 </html>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ContactModal from "./ContactModal";
-import { useSchedulerModal } from "@/contexts/schedulerModalContext";
+import { openScheduler } from "@/contexts/schedulerModalGlobals";
 
 type CTAButtonsAlignment = "center" | "left";
 type CTAButtonsVariant = "default" | "large";
@@ -23,7 +23,6 @@ const CTAButtons = ({
   className = "",
   variant = "default",
 }: CTAButtonsProps) => {
-  const { openScheduler } = useSchedulerModal();
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const handleButtonClick = (text: string, originalOnClick?: () => void) => {
