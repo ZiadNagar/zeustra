@@ -111,7 +111,8 @@ const { logoSrc = "/assets/zeustra-loader-icon.svg", loadingText = "Loading" } =
 
     position: fixed;
     inset: 0;
-    z-index: 200;
+    /* Must be above all page content (mobile menu z-9999, modals z-120, etc.) */
+    z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -255,11 +256,19 @@ const { logoSrc = "/assets/zeustra-loader-icon.svg", loadingText = "Loading" } =
   const MIN_BOOT_MS = 800;
   const FADE_OUT_MS = 400;
 
+  /**
+   * Prevent the browser from retaining scroll position between SPA navigations.
+   * Astro View Transitions otherwise persists the old scroll Y, which conflicts
+   * with the scroll-to-top behaviour we want on every page transition.
+   */
+  if (history.scrollRestoration !== "manual") {
+    history.scrollRestoration = "manual";
+  }
+
   function showLoader() {
     const loader = document.querySelector('[data-page-loader]');
     if (!loader) return;
 
-    // Remove hidden class to show the loader
     loader.classList.remove('gooey-orbital-loader--hidden');
   }
 
@@ -267,20 +276,20 @@ const { logoSrc = "/assets/zeustra-loader-icon.svg", loadingText = "Loading" } =
     const loader = document.querySelector('[data-page-loader]');
     if (!loader) return;
 
-    // Prevent multiple hide calls
     if (loader.classList.contains('gooey-orbital-loader--hidden')) return;
 
-    // Add hidden class to trigger fade-out
     loader.classList.add('gooey-orbital-loader--hidden');
 
-    // Remove from DOM after transition completes
     setTimeout(() => {
       loader.remove();
     }, FADE_OUT_MS);
   }
 
+  function scrollToTop() {
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" });
+  }
+
   function bootAndHide() {
-    // Ensure minimum display time before hiding
     const elapsed = performance.now();
     const remaining = MIN_BOOT_MS - elapsed;
 
@@ -291,19 +300,28 @@ const { logoSrc = "/assets/zeustra-loader-icon.svg", loadingText = "Loading" } =
     }
   }
 
-  // Initial page load - hide after content is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootAndHide);
-  } else {
-    bootAndHide();
-  }
+  /**
+   * Astro ClientRouter (View Transitions) navigation.
+   *
+   * Order on every client-side navigation:
+   *   1. astro:before-preparation → show loader
+   *   2. astro:after-swap         → DOM is replaced
+   *   3. astro:page-load          → scroll to top, hide loader
+   */
 
-  // Astro ClientRouter (View Transitions) navigation
-  // Show loader when navigation starts
-  document.addEventListener('astro:before-preparation', () => {
+  document.addEventListener("astro:before-preparation", () => {
     showLoader();
   });
 
-  // Hide loader when new page is ready
-  document.addEventListener('astro:page-load', bootAndHide);
+  document.addEventListener("astro:page-load", () => {
+    scrollToTop();
+    bootAndHide();
+  });
+
+  // Initial page load — hide loader after content is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootAndHide);
+  } else {
+    bootAndHide();
+  }
 </script>
