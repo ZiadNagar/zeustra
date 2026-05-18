@@ -259,7 +259,7 @@ const Features = (): ReactElement => {
 
   return (
     <section className="flex items-center min-h-0 py-16 bg-transparent md:py-24 lg:py-32">
-      <div className="w-full px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      <div className="flex flex-col w-full px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 gap-8 sm:gap-10 lg:gap-8">
         <div className="flex flex-col items-center gap-4 sm:gap-6 text-center">
           <div className="flex flex-col items-center gap-4 sm:gap-6 max-w-6xl mx-auto">
             <h2 className="text-2xl sm:text-3xl lg:text-[48px] font-medium leading-tight lg:leading-18 tracking-tight lg:tracking-[-2.16px] text-neutral-100">
