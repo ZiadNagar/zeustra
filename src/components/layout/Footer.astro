@@ -33,7 +33,7 @@ const navigationItems = NAVIGATION_ITEMS.filter((item) => item.href);
         class="flex w-full flex-col items-center justify-start gap-6 md:gap-8"
       >
         <div
-          class="flex items-center justify-center gap-4 whitespace-nowrap sm:gap-6 md:gap-7"
+          class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-x-6 md:gap-x-7"
         >
           {
             navigationItems.map((item) => (
@@ -49,7 +49,7 @@ const navigationItems = NAVIGATION_ITEMS.filter((item) => item.href);
         </div>
 
         <div
-          class="flex items-center justify-center gap-4 text-sm font-normal tracking-[-0.02em] text-slate-500"
+          class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm font-normal tracking-[-0.02em] text-slate-500"
         >
           <a
             href="/terms/"
