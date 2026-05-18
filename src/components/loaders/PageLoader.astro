@@ -286,7 +286,41 @@ const { logoSrc = "/assets/zeustra-loader-icon.svg", loadingText = "Loading" } =
   }
 
   function scrollToTop() {
-    window.scrollTo({ left: 0, top: 0, behavior: "instant" });
+    /*
+     * Mobile browsers (especially iOS Safari) finalise the viewport late
+     * and may restore scroll position after astro:page-load fires.
+     * Use multiple strategies to guarantee the page starts at the top.
+     *
+     * We must override scroll-behavior on the root because theme.css sets
+     * html { scroll-behavior: smooth }, which would make window.scrollTo()
+     * animate smoothly instead of jumping instantly.
+     */
+
+    const html = document.documentElement;
+    const savedBehavior = html.style.scrollBehavior;
+    html.style.scrollBehavior = "auto";
+
+    // 1. Primary — three targeting strategies for cross-browser coverage.
+    window.scrollTo(0, 0);
+    html.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // 2. Retry after the first paint — catches iOS viewport-finalisation lag.
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      html.scrollTop = 0;
+      html.style.scrollBehavior = savedBehavior;
+    });
+
+    // 3. Delayed retry — fights browser scroll restoration that may fire
+    //    after the view transition completes on mobile.
+    setTimeout(() => {
+      if (window.scrollY > 0 || html.scrollTop > 0) {
+        window.scrollTo(0, 0);
+        html.scrollTop = 0;
+        document.body.scrollTop = 0;
+      }
+    }, 200);
   }
 
   function bootAndHide() {
@@ -305,12 +339,21 @@ const { logoSrc = "/assets/zeustra-loader-icon.svg", loadingText = "Loading" } =
    *
    * Order on every client-side navigation:
    *   1. astro:before-preparation → show loader
-   *   2. astro:after-swap         → DOM is replaced
-   *   3. astro:page-load          → scroll to top, hide loader
+   *   2. astro:after-swap         → DOM is replaced, Astro restores scroll
+   *   3. astro:page-load          → new page ready, hide loader
+   *
+   * Per Astro docs, `astro:after-swap` is the recommended event for scroll
+   * reset (fires right after Astro restores scroll). `astro:page-load` is
+   * kept too — the rAF + setTimeout retries there fight browsers that
+   * restore scroll asynchronously (common on mobile Safari/Chrome).
    */
 
   document.addEventListener("astro:before-preparation", () => {
     showLoader();
+  });
+
+  document.addEventListener("astro:after-swap", () => {
+    scrollToTop();
   });
 
   document.addEventListener("astro:page-load", () => {
