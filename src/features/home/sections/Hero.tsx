@@ -12,14 +12,15 @@ const HERO_TYPING_STYLE = {
   color: "var(--color-neutral-50, #F2F2F2)",
   lineHeight: "1.1",
   letterSpacing: "inherit",
+  minWidth: "14ch",
 };
 
 const HeroTyping = memo(function HeroTyping() {
   return (
     <TypeAnimation
-      sequence={["Broker", 1100, "Workspace", 1100, "Marketplace", 1100]}
-      speed={{ type: "keyStrokeDelayInMs", value: 300 }}
-      deletionSpeed={{ type: "keyStrokeDelayInMs", value: 280 }}
+      sequence={["Broker", 500, "Workspace", 500, "Marketplace", 500]}
+      speed={{ type: "keyStrokeDelayInMs", value: 180 }}
+      deletionSpeed={{ type: "keyStrokeDelayInMs", value: 120 }}
       repeat={Infinity}
       cursor={true}
       wrapper="span"
@@ -88,7 +89,7 @@ const Hero = () => {
 
                   {/* Animated Typing Container */}
                   <div className="relative flex justify-center w-full">
-                    <div className="w-fit min-w-[10ch] sm:min-w-[11ch] px-3 py-2 sm:px-4 sm:py-3 lg:px-5 lg:py-3 rounded-xl sm:rounded-[14px] lg:rounded-2xl bg-brand-blue-deep/30 border border-brand-blue-deep/60 flex items-center justify-center transition-all duration-300 ease-out">
+                    <div className="w-fit min-w-[14ch] px-3 py-2 sm:px-4 sm:py-3 lg:px-5 lg:py-3 rounded-xl sm:rounded-[14px] lg:rounded-2xl bg-brand-blue-deep/30 border border-brand-blue-deep/60 flex items-center justify-center transition-all duration-300 ease-out">
                       <div className="flex items-center justify-center overflow-hidden">
                         <HeroTyping />
                       </div>
