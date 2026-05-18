@@ -21,10 +21,10 @@ const seo = PAGE_SEO.marketplace;
     <Header currentPathname={Astro.url.pathname} />
 
     <main class="flex-1 bg-black">
-      <MarketplaceHero />
+      <MarketplaceHero client:load />
       <MarketplaceFeatureCard client:load />
       <MarketplaceGrid />
-      <MarketplaceCTA />
+      <MarketplaceCTA client:load />
     </main>
 
     <Footer />
