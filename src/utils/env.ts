@@ -4,7 +4,7 @@ const DEFAULT_LINKEDIN_URL = "https://linkedin.com/company/zeustra";
 const DEFAULT_TWITTER_URL = "https://twitter.com/zeustra";
 const DEFAULT_ZOOM_SCHEDULER_URL =
   "https://scheduler.zoom.us/zeustra/zeustra-intro-call";
-const DEFAULT_STRAPI_BASE_URL = "https://zeustra-strapi.osloop.com";
+const DEFAULT_STRAPI_BASE_URL = "https://strapi-admin-production-469f.up.railway.app";
 const DEFAULT_STRAPI_API_PATH = "/api";
 const DEFAULT_STRAPI_LOCALE = "en";
 const DEFAULT_STRAPI_TIMEOUT_MS = "10000";
